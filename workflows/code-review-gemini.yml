@@ -1,0 +1,47 @@
+name: LLM Code Review Gemini
+
+on:
+  workflow_call:
+    inputs:
+      files_to_analyze:
+        description: "Una cadena con los nombres de archivo separados por espacios para analizar"
+        required: true
+        type: string
+      fail_level:
+        description: "Severidad mínima para fallar el workflow (alta, media, baja, ninguna)"
+        required: false
+        type: string
+        default: 'alta'
+    secrets:
+      LLM_PROVIDER:
+        required: true
+      LLM_API_KEY:
+        required: true
+
+jobs:
+  llm-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install google-generativeai
+
+      - name: Run LLM review
+        env:
+          LLM_PROVIDER: ${{ secrets.LLM_PROVIDER }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+        run: |
+          python .github/scripts/llm_review.py \
+            --provider "$LLM_PROVIDER" \
+            --api-key "$LLM_API_KEY" \
+            --files ${{ inputs.files_to_analyze }} \
+            --fail-on-severity ${{ inputs.fail_level }}
