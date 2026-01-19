@@ -62,5 +62,5 @@ jobs:
           context: ${{ inputs.context }}
           file: ${{ inputs.dockerfile_path }}
           push: true
-          tags: ${{ inputs.registry }}/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ inputs.tags }}
+          tags: ${{ inputs.registry }}/${{ github.repository_owner | lower }}/${{ inputs.image_name }}:${{ inputs.tags }}
           platforms: linux/amd64 # Specify platform for broader compatibility
