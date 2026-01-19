@@ -11,7 +11,7 @@ on:
         description: "Severidad mínima para fallar el workflow (alta, media, baja, ninguna)"
         required: false
         type: string
-        default: 'alta'
+        default: "alta"
     secrets:
       LLM_PROVIDER:
         required: true

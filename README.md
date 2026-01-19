@@ -1,32 +1,48 @@
-# LLM-Powered Code Review Assistant
+# Asistente de Revisión de Código Potenciado por LLM
 
-This project provides a GitHub Actions workflow to automatically review code in pull requests using a Large Language Model (LLM). It acts as an AI-powered assistant to help maintain code quality, identify potential issues, and enforce best practices.
+Este proyecto proporciona un conjunto de flujos de trabajo de GitHub Actions para mejorar la calidad y seguridad del código en tus repositorios, utilizando un Modelo de Lenguaje Grande (LLM) para realizar revisiones automáticas de código y un quality gate para la cobertura de pruebas.
 
-## How It Works
+## Características
 
-1.  **Trigger**: The workflow is automatically triggered on any `pull_request` to the repository.
-2.  **File Detection**: It uses the `tj-actions/changed-files` action to identify all files that have been modified in the pull request.
-3.  **Code Analysis**: The list of changed files is passed to the core Python script, `.github/scripts/llm_review.py`.
-4.  **LLM Review**: The script is responsible for sending the content of the changed files to an LLM, guided by a detailed prompt that instructs the AI to act as a senior software engineer. The prompt directs the LLM to check for:
-    - Security vulnerabilities
-    - Architectural and design principles
-    - Performance issues
-    - Code style and readability
-    - Best practices
+- **Revisión de Código por IA**: Un flujo de trabajo reutilizable (`code-review-gemini.yml`) que analiza los archivos modificados en un pull request utilizando el modelo **Gemini 1.5 Flash**.
+- **Quality Gate de Cobertura**: Un flujo de trabajo (`quality-gate.yml`) que valida el reporte de cobertura de pruebas y puede hacer fallar el pipeline si no se alcanza un umbral mínimo.
+- **Análisis de Severidad**: El script de revisión es capaz de interpretar la severidad de los hallazgos del LLM (Alta, Media, Baja) y hacer fallar el pipeline en consecuencia.
+- **Identidad de Experto**: El LLM es instruido para actuar como un Ingeniero de Software Senior y Arquitecto de Ciberseguridad, proporcionando feedback pedagógico y de alta calidad.
+- **Agentes Especializados**: El repositorio incluye un directorio `agents/` con definiciones de "personas" expertas (ej. `fastapi-expert.md`), preparando el terreno para futuras especializaciones de la revisión de código.
 
-## Setup
+## ¿Cómo Funciona la Revisión de Código?
 
-To use this workflow, you must configure the following secrets in your GitHub repository settings (`Settings > Secrets and variables > Actions`):
+1.  **Disparador**: El flujo de trabajo `code-review-gemini.yml` se invoca desde otro flujo de trabajo, pasándole una lista de archivos a analizar.
+2.  **Análisis con Gemini**: El script `.github/scripts/llm_review.py` recibe la lista de archivos.
+3.  **Envío al LLM**: Cada archivo es enviado a la API de Gemini con un prompt detallado que instruye al modelo para auditar el código en base a cuatro pilares:
+    - **Seguridad**: Vulnerabilidades (OWASP Top 10, inyecciones, etc.).
+    - **Arquitectura y Diseño**: Principios SOLID y código duplicado.
+    - **Estilo y Legibilidad**: Cumplimiento de PEP 8.
+    - **Optimización**: Mejoras algorítmicas o de estructuras de datos.
+4.  **Reporte y Control**:
+    - El LLM devuelve un análisis en formato Markdown con una matriz de hallazgos.
+    - El script `llm_review.py` imprime esta revisión en los logs del workflow.
+    - Si se configura `fail_on_severity`, el script busca hallazgos que cumplan o superen el umbral (ej. 'alta') y, si los encuentra, hace fallar el pipeline.
 
--   `LLM_PROVIDER`: The name of the LLM provider you are using (e.g., `gemini`, `openai`).
--   `LLM_API_KEY`: Your API key for the chosen provider.
+## Configuración
 
-## Current Status & Future Work
+Para utilizar los flujos de trabajo, necesitas configurar los siguientes secretos en tu repositorio de GitHub (`Settings > Secrets and variables > Actions`):
 
-This repository contains the foundational structure for the workflow. The `llm-review.yml` workflow is fully configured.
+-   `LLM_PROVIDER`: El proveedor de LLM a utilizar. Actualmente, el script soporta `gemini`.
+-   `LLM_API_KEY`: Tu clave de API para el proveedor.
 
-The core logic in `.github/scripts/llm_review.py` is currently a **placeholder**. It correctly parses arguments and reads the changed files but does not yet make an actual API call to an LLM. The next step is to implement the `analyze_code_with_llm` function to send the code and the built-in prompt to your chosen LLM provider's API.
+## Ejemplo de Uso
 
-## The `agents/` Directory
+Puedes llamar al flujo de trabajo de revisión de código desde tu propio workflow de CI/CD de la siguiente manera:
 
-The `.github/agents/` directory contains specialized "persona" files (e.g., `fastapi-expert.md`). These are detailed prompts that define different expert AI agents. This suggests a future vision where the workflow could dynamically select a specialized agent based on the type of code being reviewed.
+```yaml
+jobs:
+  code-review:
+    uses: ./.github/workflows/code-review-gemini.yml
+    with:
+      files_to_analyze: ${{ steps.changed-files.outputs.all_modified_files }}
+      fail_level: "alta" # Opcional: media, baja, ninguna
+    secrets:
+      LLM_PROVIDER: ${{ secrets.LLM_PROVIDER }}
+      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+```
