@@ -40,7 +40,7 @@ jobs:
           LLM_PROVIDER: ${{ secrets.LLM_PROVIDER }}
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
         run: |
-          python .github/scripts/llm_review.py \
+          python centralizado/.github/scripts/llm_review.py \
             --provider "$LLM_PROVIDER" \
             --api-key "$LLM_API_KEY" \
             --files ${{ inputs.files_to_analyze }} \
