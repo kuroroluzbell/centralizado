@@ -37,7 +37,7 @@ def analyze_code_with_llm(files: List[str], provider: str, api_key: str) -> List
 
     try:
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-2.5-pro')
+        model = genai.GenerativeModel('gemini-2.5-flash')
     except Exception as e:
         print(f"Error: Fallo al inicializar el cliente de Gemini: {e}")
         sys.exit(1)
