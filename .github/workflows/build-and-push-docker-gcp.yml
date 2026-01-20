@@ -77,4 +77,4 @@ jobs:
           region: "us-central1"
           # Ruta completa a la imagen que acabas de subir a Artifact Registry
           image: ${{ inputs.artifact_registry_region }}-docker.pkg.dev/${{ secrets.gcp_project_id }}/${{ inputs.artifact_registry_repository }}/${{ inputs.image_name }}:latest
-          flags: --allow-unauthenticated --port=8080 --memory=512Mi
+          flags: --allow-unauthenticated --memory=512Mi
