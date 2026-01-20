@@ -68,3 +68,15 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: "text-to-youtube-service"
+          region: "us-central1"
+          # Ruta completa a la imagen que acabas de subir a Artifact Registry
+          image: "${{ steps.meta.outputs.tags }}"
+          flags: |
+            --allow-unauthenticated
+            --port=8080
+            --memory=512Mi
