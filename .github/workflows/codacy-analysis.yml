@@ -26,8 +26,24 @@ jobs:
           # Esto genera un reporte que GitHub puede leer nativamente
           output: results.sarif
           format: sarif
+          # Continue so we can get the artifact even if Codacy finds issues
+          continue-on-error: true
+
+      - name: Check for analysis results
+        id: check_files
+        uses: andstor/file-existence-action@v3
+        with:
+          files: "results.sarif"
 
       - name: Upload SARIF results to GitHub
+        if: steps.check_files.outputs.files_exists == 'true'
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: results.sarif
+
+      - name: Upload SARIF as artifact for debugging
+        if: always() && steps.check_files.outputs.files_exists == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: sarif-report
+          path: results.sarif
