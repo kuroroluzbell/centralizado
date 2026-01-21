@@ -1,0 +1,24 @@
+name: Version Check
+
+on:
+  workflow_call:
+    inputs:
+      version_file:
+        description: 'The file containing the version number (e.g., pom.xml, package.json).'
+        required: true
+        type: string
+
+jobs:
+  check-version-bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v4
+        with:
+          # Fetch all history so the action can compare against the base branch
+          fetch-depth: 0
+
+      - name: 'Check if version was bumped'
+        uses: 'endeveit/version-check@v10'
+        with:
+          file-name: ${{ inputs.version_file }}
