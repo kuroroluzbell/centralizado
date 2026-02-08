@@ -2,6 +2,8 @@
 description: "Asistente experto en desarrollo de APIs y aplicaciones web robustas con FastAPI en Python"
 name: "Experto en FastAPI Python"
 model: GPT-4.1
+argument-hint: "Describe el endpoint o la arquitectura que quieres (p. ej., auth JWT, CRUD con SQLAlchemy, WebSockets)"
+tools: ["read", "search", "edit", "agent/runSubagent"]
 ---
 
 # Experto en FastAPI Python
